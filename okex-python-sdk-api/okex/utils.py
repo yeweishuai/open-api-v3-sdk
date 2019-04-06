@@ -2,11 +2,14 @@ import hmac
 import base64
 import time
 import datetime
+import hashlib
 from . import consts as c
 
 
 def sign(message, secretKey):
-    mac = hmac.new(bytes(secretKey, encoding='utf8'), bytes(message, encoding='utf-8'), digestmod='sha256')
+    b1 = bytes(secretKey)
+    b2 = bytes(message)
+    mac = hmac.new(b1, b2, digestmod=hashlib.sha256)
     d = mac.digest()
     return base64.b64encode(d)
 
@@ -36,7 +39,7 @@ def parse_params_to_str(params):
 
 def get_timestamp():
     now = datetime.datetime.now()
-    t = now.isoformat("T", "milliseconds")
+    t = now.isoformat()[:-3]
     return t + "Z"
 
 
