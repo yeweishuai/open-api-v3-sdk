@@ -8,6 +8,7 @@ package okex
 */
 
 import (
+    "fmt"
 	"bytes"
 	"compress/flate"
 	"github.com/gorilla/websocket"
@@ -95,7 +96,19 @@ func (a *OKWSAgent) Subscribe(channel, filter string, cb ReceivedDataCallback) e
 		cbs = []ReceivedDataCallback{}
 		a.activeChannels[st.channel] = false
 	}
-	cbs = append(cbs, cb)
+    already_put := false
+    for _, cbk := range cbs {
+        // hack: to avoid same function repeatedly called
+        c1s := fmt.Sprintf("%v", cb)
+        c2s := fmt.Sprintf("%v", cbk)
+        if cb!= nil && cbk!= nil && c1s == c2s {
+            already_put = true
+            break
+        }
+    }
+    if !already_put {
+	    cbs = append(cbs, cb)
+    }
 	a.subMap[st.channel] = cbs
 	fullTopic, err := st.ToString()
 	a.subMap[fullTopic] = cbs
